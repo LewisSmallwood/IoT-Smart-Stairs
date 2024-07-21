@@ -7,9 +7,7 @@
     "email": "lewis@smallwood.it"
   },
   "scripts": {
-    "start": "npx tsc && npx tsc-alias && node ./dist/app/index.js",
-    "test": "jest",
-    "test:watch": "jest --watchAll"
+    "start": "npx tsc && npx tsc-alias && node ./dist/src/index.js"
   },
   "repository": {
     "type": "git",
