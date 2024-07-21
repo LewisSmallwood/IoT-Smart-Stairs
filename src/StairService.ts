@@ -22,7 +22,7 @@ export class StairService extends Singleton<StairService> {
      */
     #setupFloorHatchSwitch() {
         // Set up the button as an input.
-        GPIO.open(this.FLOOR_HATCH_SWITCH_PIN, GPIO.INPUT, GPIO.PULL_UP);
+        GPIO.open(this.FLOOR_HATCH_SWITCH_PIN, GPIO.INPUT, GPIO.PULL_DOWN);
 
         // Poll for state changes.
         GPIO.poll(this.FLOOR_HATCH_SWITCH_PIN, (pin: number) => {
