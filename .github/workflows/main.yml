@@ -17,9 +17,6 @@ jobs:
       run: |
         sudo cp -r $GITHUB_WORKSPACE /root/repo
 
-    - name: Navigate to project directory
-      working-directory: /root/repo
-
     - name: Install NPM dependencies
       run: |
         cd /root/repo
@@ -27,10 +24,8 @@ jobs:
 
     - name: Build the project
       run: |
-        cd /root/repo
         npm run build
 
     - name: Start the application with pm2
       run: |
-        cd /root/repo
         pm2 start ecosystem.config.js --env production
