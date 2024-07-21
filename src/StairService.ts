@@ -4,8 +4,8 @@ import { Singleton } from '@/domain/abstracts/Singleton';
 export class StairService extends Singleton<StairService> {
     #isHatchOpen: boolean = false;
 
-    FLOOR_HATCH_SWITCH_PIN: number = 0;
-    LED_DRIVER_POWER_RELAY_PIN: number = 0;
+    FLOOR_HATCH_SWITCH_PIN: number = 40;
+    LED_DRIVER_POWER_RELAY_PIN: number = 11;
 
     /**
      * Start the stair service.
@@ -30,7 +30,7 @@ export class StairService extends Singleton<StairService> {
             GPIO.msleep(20);
 
             // Raise event for the hatch opening/closing.
-            this.#onStairHatchStateChange(GPIO.read(pin));
+            this.#onStairHatchStateChange(GPIO.read(pin) === GPIO.HIGH);
         }, GPIO.POLL_BOTH);
     }
 
@@ -51,7 +51,7 @@ export class StairService extends Singleton<StairService> {
         this.#isHatchOpen = isOpened;
 
         // Turn on or off the LED Driver for under the stairs, when the hatch opens/closes.
-        this.#toggleLedDriverPowerRelayState(isOpened);
+        this.#setLedDriverPowerRelayState(this.#isHatchOpen);
 
         // TODO: Add 0-10v dimming using a PWM output.
     }
@@ -61,7 +61,7 @@ export class StairService extends Singleton<StairService> {
      * @param {boolean} state
      * @private
      */
-    #toggleLedDriverPowerRelayState(state=false) {
+    #setLedDriverPowerRelayState(state=false) {
         GPIO.write(this.LED_DRIVER_POWER_RELAY_PIN, state ? GPIO.HIGH : GPIO.LOW);
     }
 }
