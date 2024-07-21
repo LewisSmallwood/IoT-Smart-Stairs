@@ -29,8 +29,10 @@ jobs:
 
     - name: Build the project
       run: |
+        cd /root/repo
         npm run build
 
     - name: Start the application with pm2
       run: |
+        cd /root/repo
         pm2 start ecosystem.config.js --env production
