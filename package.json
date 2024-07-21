@@ -7,6 +7,7 @@
     "email": "lewis@smallwood.it"
   },
   "scripts": {
+    "build": "npx tsc && npx tsc-alias",
     "start": "npx tsc && npx tsc-alias && node ./dist/src/index.js"
   },
   "repository": {
