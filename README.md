@@ -2,10 +2,7 @@
 
 Internet-connected smart stair lighting control, using GPIO on the Raspberry Pi to control lighting.
 
-The project is built in TypeScript with tests using Jest.
-
-## Brief
-TODO
+The project is built using TypeScript.
 
 ## Hardware
 TODO: Hardware and Component Description
@@ -23,21 +20,8 @@ Install dependencies
 npm install
 ```
 
-### Running tests
-
-To run all tests
+Start the project
 
 ```sh
-npm run test
-```
-
-To run all tests in watch mode
-
-```sh
-npm run test:watch
-```
-
-To run one test
-```sh
-npm run test <testname>
+npm start
 ```
