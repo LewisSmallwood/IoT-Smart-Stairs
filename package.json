@@ -1,0 +1,31 @@
+{
+  "name": "iot-smart-stairs",
+  "version": "1.0.0",
+  "description": "IoT Smart Stairs",
+  "author": {
+    "name": "Lewis Smallwood",
+    "email": "lewis@smallwood.it"
+  },
+  "scripts": {
+    "start": "npx tsc && npx tsc-alias && node ./dist/app/index.js",
+    "test": "jest",
+    "test:watch": "jest --watchAll"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LewisSmallwood/IoT-Smart-Stairs.git"
+  },
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^16.18.97",
+    "ts-node": "^10.4.0",
+    "tsconfig-paths": "^3.15.0",
+    "tslib": "^2.6.3",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@types/rpio": "^2.4.6",
+    "rpio": "^2.4.2"
+  }
+}
