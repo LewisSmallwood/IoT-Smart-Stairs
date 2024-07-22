@@ -50,6 +50,8 @@ export class StairService extends Singleton<StairService> {
     #onStairHatchStateChange(isOpened=false) {
         this.#isHatchOpen = isOpened;
 
+        console.log("[Hatch]", isOpened ? "Opened" : "Closed");
+
         // Turn on or off the LED Driver for under the stairs, when the hatch opens/closes.
         this.#setLedDriverPowerRelayState(this.#isHatchOpen);
 
