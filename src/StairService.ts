@@ -120,17 +120,18 @@ export class StairService extends Singleton<StairService> {
     }
 
     /**
-     * Fade in the PWM dimmer from 0 to 100% using an easing function.
+     * Fade in the PWM dimmer from 0 to 100% using an exponential easing function.
      * Gradually increases the PWM duty cycle from 0 to the maximum value over a specified duration.
-     * @param {number} [duration=1000] - The duration of the fade-in process in milliseconds.
+     * @param {number} [duration=2000] - The duration of the fade-in process in milliseconds.
      * @private
      */
     #fadeInPwmDimmer(duration = 2000) {
         // Cancel any active fades.
         this.#cancelFade();
 
-        // Easing function (quadratic ease-in-out).
-        const easeInOutQuad = (t: number) => (t < 0.5) ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        // Exponential easing function.
+        const pwmIntervals = 100;
+        const R = (pwmIntervals * Math.log10(2)) / Math.log10(255);
 
         // Number of steps.
         const steps = 1024;
@@ -138,8 +139,9 @@ export class StairService extends Singleton<StairService> {
 
         for (let i = 0; i <= steps; i++) {
             const t = i / steps;
-            const easedValue = easeInOutQuad(t);
-            const pwmValue = Math.round(easedValue * steps);
+            const interval = t * pwmIntervals;
+            const brightness = Math.pow(2, interval / R) - 1;
+            const pwmValue = Math.round(brightness);
 
             const timeoutId = setTimeout(() => {
                 GPIO.pwmSetData(this.PWM_DIMMER_PIN, pwmValue);
