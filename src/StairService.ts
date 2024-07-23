@@ -72,7 +72,7 @@ export class StairService extends Singleton<StairService> {
      */
     #setupPwmDimmer() {
         GPIO.open(this.PWM_DIMMER_PIN, GPIO.PWM);
-        GPIO.pwmSetClockDivider(1024);
+        GPIO.pwmSetClockDivider(16);
         GPIO.pwmSetRange(this.PWM_DIMMER_PIN, 1024);
         GPIO.pwmSetData(this.PWM_DIMMER_PIN, 0);
     }
