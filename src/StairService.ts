@@ -8,7 +8,7 @@ import { Debounce } from "~/helpers/Debounce";
 export class StairService extends Singleton<StairService> {
     #isHatchOpen: boolean = false;
     #hatchDebouncer: Debounce = new Debounce();
-    #fadeTimeouts: any[] = [];
+    #fadeIntervals: any[] = [];
 
     FLOOR_HATCH_SWITCH_PIN: number = 40;
     LED_DRIVER_POWER_RELAY_PIN: number = 11;
@@ -129,26 +129,32 @@ export class StairService extends Singleton<StairService> {
         // Cancel any active fades.
         this.#cancelFade();
 
-        // Exponential easing function.
+        // Exponential easing function parameters.
         const pwmIntervals = 100;
         const R = (pwmIntervals * Math.log10(2)) / Math.log10(255);
 
         // Number of steps.
         const steps = 1024;
         const stepDuration = duration / steps;
+        let currentStep = 0;
 
-        for (let i = 0; i <= steps; i++) {
-            const t = i / steps;
+        // Use setInterval to update the PWM value at regular intervals.
+        const intervalId = setInterval(() => {
+            if (currentStep > steps) {
+                clearInterval(intervalId);
+                return;
+            }
+
+            const t = currentStep / steps;
             const interval = t * pwmIntervals;
             const brightness = Math.pow(2, interval / R) - 1;
             const pwmValue = Math.round(brightness);
 
-            const timeoutId = setTimeout(() => {
-                GPIO.pwmSetData(this.PWM_DIMMER_PIN, pwmValue);
-            }, i * stepDuration);
+            GPIO.pwmSetData(this.PWM_DIMMER_PIN, pwmValue);
+            currentStep++;
+        }, stepDuration);
 
-            this.#fadeTimeouts.push(timeoutId);
-        }
+        this.#fadeIntervals.push(intervalId);
     }
 
     /**
@@ -158,8 +164,8 @@ export class StairService extends Singleton<StairService> {
      */
     #cancelFade() {
         // Clear any pending fade steps.
-        this.#fadeTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
-        this.#fadeTimeouts = [];
+        this.#fadeIntervals.forEach(intervalId => clearInterval(intervalId));
+        this.#fadeIntervals = [];
 
         // Jump to 0v.
         GPIO.pwmSetData(this.PWM_DIMMER_PIN, 0);
