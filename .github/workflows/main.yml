@@ -35,4 +35,4 @@ jobs:
     - name: Start the application with pm2
       run: |
         cd /root/projects/IoT-Smart-Stairs
-        pm2 start ecosystem.config.js --env production
+        pm2 start ecosystem.config.js
