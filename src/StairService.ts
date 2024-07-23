@@ -5,10 +5,9 @@ import { Debounce } from "~/helpers/Debounce";
 export class StairService extends Singleton<StairService> {
     #isHatchOpen: boolean = false;
     #hatchDebouncer: Debounce = new Debounce();
-
-
     FLOOR_HATCH_SWITCH_PIN: number = 40;
     LED_DRIVER_POWER_RELAY_PIN: number = 11;
+    PWM_DIMMER_PIN: number = 12;
 
     /**
      * Start the stair service.
@@ -17,6 +16,7 @@ export class StairService extends Singleton<StairService> {
         const instance = this.getInstance();
         instance.#setupFloorHatchSwitch();
         instance.#setupLedDriverPowerRelay();
+        instance.#setupPwmDimmer();
     }
 
     /**
@@ -50,6 +50,42 @@ export class StairService extends Singleton<StairService> {
      */
     #setupLedDriverPowerRelay() {
         GPIO.open(this.LED_DRIVER_POWER_RELAY_PIN, GPIO.OUTPUT, GPIO.LOW);
+    }
+
+    #setupPwmDimmer() {
+        const pin = this.PWM_DIMMER_PIN;
+        const range = 1024;       /* LEDs can quickly hit max brightness, so only use */
+        const max = 128;          /*   the bottom 8th of a larger scale */
+        const clockDiv = 8;       /* Clock divider (PWM refresh rate), 8 == 2.4MHz */
+        const interval = 5;       /* setInterval timer, speed of pulses */
+        let times = 100;          /* How many times to pulse before exiting */
+
+        /*
+         * Enable PWM on the chosen pin and set the clock and range.
+         */
+        GPIO.open(pin, GPIO.PWM);
+        GPIO.pwmSetClockDivider(clockDiv);
+        GPIO.pwmSetRange(pin, range);
+
+        /*
+         * Repeatedly pulse from low to high and back again until times runs out.
+         */
+        let direction = 1;
+        let data = 0;
+        const pulse = setInterval(function() {
+            GPIO.pwmSetData(pin, data);
+            if (data === 0) {
+                direction = 1;
+                if (times-- === 0) {
+                    clearInterval(pulse);
+                    rpio.open(pin, rpio.INPUT);
+                    return;
+                }
+            } else if (data === max) {
+                direction = -1;
+            }
+            data += direction;
+        }, interval, data, direction, times);
     }
 
     /**
