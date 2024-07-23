@@ -8,7 +8,6 @@ import { Debounce } from "~/helpers/Debounce";
 export class StairService extends Singleton<StairService> {
     #isHatchOpen: boolean = false;
     #hatchDebouncer: Debounce = new Debounce();
-    #fadeIntervals: any[] = [];
 
     FLOOR_HATCH_SWITCH_PIN: number = 40;
     LED_DRIVER_POWER_RELAY_PIN: number = 11;
