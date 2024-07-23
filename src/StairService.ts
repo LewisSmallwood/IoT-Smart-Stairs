@@ -125,7 +125,7 @@ export class StairService extends Singleton<StairService> {
      * @param {number} [duration=1000] - The duration of the fade-in process in milliseconds.
      * @private
      */
-    #fadeInPwmDimmer(duration = 1000) {
+    #fadeInPwmDimmer(duration = 2000) {
         // Cancel any active fades.
         this.#cancelFade();
 
@@ -136,22 +136,17 @@ export class StairService extends Singleton<StairService> {
         const steps = 1024;
         const stepDuration = duration / steps;
 
-        // Add start delay.
-        const startDelay = 300;
+        for (let i = 0; i <= steps; i++) {
+            const t = i / steps;
+            const easedValue = easeInOutQuad(t);
+            const pwmValue = Math.round(easedValue * steps);
 
-        setTimeout(() => {
-            for (let i = 0; i <= steps; i++) {
-                const t = i / steps;
-                const easedValue = easeInOutQuad(t);
-                const pwmValue = Math.round(easedValue * steps);
+            const timeoutId = setTimeout(() => {
+                GPIO.pwmSetData(this.PWM_DIMMER_PIN, pwmValue);
+            }, i * stepDuration);
 
-                const timeoutId = setTimeout(() => {
-                    GPIO.pwmSetData(this.PWM_DIMMER_PIN, pwmValue);
-                }, i * stepDuration);
-
-                this.#fadeTimeouts.push(timeoutId);
-            }
-        }, startDelay);
+            this.#fadeTimeouts.push(timeoutId);
+        }
     }
 
     /**
