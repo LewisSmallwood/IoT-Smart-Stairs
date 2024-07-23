@@ -72,7 +72,7 @@ export class StairService extends Singleton<StairService> {
      */
     #setupPwmDimmer() {
         GPIO.open(this.PWM_DIMMER_PIN, GPIO.PWM);
-        GPIO.pwmSetClockDivider(16);
+        GPIO.pwmSetClockDivider(8); // 2.4 MHz PWM Refresh Rate
         GPIO.pwmSetRange(this.PWM_DIMMER_PIN, 1024);
         GPIO.pwmSetData(this.PWM_DIMMER_PIN, 0);
     }
@@ -120,26 +120,38 @@ export class StairService extends Singleton<StairService> {
     }
 
     /**
-     * Fade in the PWM dimmer from 0 to 100%.
+     * Fade in the PWM dimmer from 0 to 100% using an easing function.
      * Gradually increases the PWM duty cycle from 0 to the maximum value over a specified duration.
      * @param {number} [duration=1000] - The duration of the fade-in process in milliseconds.
      * @private
      */
-    #fadeInPwmDimmer(duration=1000) {
+    #fadeInPwmDimmer(duration = 1000) {
         // Cancel any active fades.
         this.#cancelFade();
 
-        // Start fading.
+        // Easing function (quadratic ease-in-out).
+        const easeInOutQuad = (t: number) => (t < 0.5) ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+        // Number of steps.
         const steps = 1024;
         const stepDuration = duration / steps;
 
-        for (let i = 0; i <= steps; i++) {
-            const timeoutId = setTimeout(() => {
-                GPIO.pwmSetData(this.PWM_DIMMER_PIN, i);
-            }, i * stepDuration);
+        // Add start delay.
+        const startDelay = 300;
 
-            this.#fadeTimeouts.push(timeoutId);
-        }
+        setTimeout(() => {
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const easedValue = easeInOutQuad(t);
+                const pwmValue = Math.round(easedValue * steps);
+
+                const timeoutId = setTimeout(() => {
+                    GPIO.pwmSetData(this.PWM_DIMMER_PIN, pwmValue);
+                }, i * stepDuration);
+
+                this.#fadeTimeouts.push(timeoutId);
+            }
+        }, startDelay);
     }
 
     /**
