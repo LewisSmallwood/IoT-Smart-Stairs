@@ -1,6 +1,6 @@
 export class Debounce {
-    #timeoutId: number | null = null;
-    readonly #delay: number;
+    #timeoutId: any = null;
+    #delay: number;
 
     constructor(delay: number = 200) {
         this.#delay = delay;

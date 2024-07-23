@@ -4,7 +4,7 @@ import { Debounce } from "~/helpers/Debounce";
 
 export class StairService extends Singleton<StairService> {
     #isHatchOpen: boolean = false;
-    #hatchDebouncer: Debounce;
+    #hatchDebouncer: Debounce = new Debounce();
 
 
     FLOOR_HATCH_SWITCH_PIN: number = 40;
