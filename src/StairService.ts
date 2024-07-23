@@ -141,7 +141,7 @@ export class StairService extends Singleton<StairService> {
 
             // Set the PWM output to the calculated brightness.
             GPIO.pwmSetData(this.PWM_DIMMER_PIN, Math.round(brightness));
-            // GPIO.msleep(1);
+            GPIO.msleep(40);
         }
     }
 
