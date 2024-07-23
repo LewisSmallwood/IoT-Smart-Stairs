@@ -1,8 +1,11 @@
 import GPIO from 'rpio';
-import { Singleton } from '@/domain/abstracts/Singleton';
+import { Singleton } from '@/abstracts/Singleton';
+import { Debounce } from "~/helpers/Debounce";
 
 export class StairService extends Singleton<StairService> {
     #isHatchOpen: boolean = false;
+    #hatchDebouncer: Debounce;
+
 
     FLOOR_HATCH_SWITCH_PIN: number = 40;
     LED_DRIVER_POWER_RELAY_PIN: number = 11;
@@ -24,13 +27,20 @@ export class StairService extends Singleton<StairService> {
         // Set up the button as an input.
         GPIO.open(this.FLOOR_HATCH_SWITCH_PIN, GPIO.INPUT, GPIO.PULL_UP);
 
+        // Set up the debouncer.
+        this.#hatchDebouncer = new Debounce();
+
         // Poll for state changes.
         GPIO.poll(this.FLOOR_HATCH_SWITCH_PIN, (pin: number) => {
             // Debounce the button press.
-            GPIO.msleep(20);
+            this.#hatchDebouncer.debounce(() => {
+                // The pull-up resistor inverts the input signal.
+                let hatchOpen = GPIO.read(pin) === GPIO.LOW;
 
-            // Raise event for the hatch opening/closing.
-            this.#onStairHatchStateChange(GPIO.read(pin) === GPIO.HIGH);
+                // Raise event for the hatch opening/closing.
+                this.#onStairHatchStateChange(hatchOpen);
+            });
+
         }, GPIO.POLL_BOTH);
     }
 
