@@ -130,31 +130,20 @@ export class StairService extends Singleton<StairService> {
         this.#cancelFade();
 
         // Exponential easing function parameters.
-        const pwmIntervals = 100;
-        const R = (pwmIntervals * Math.log10(2)) / Math.log10(255);
+        const pwmIntervals = 1024;
+        const R = (pwmIntervals * Math.log10(2)) / Math.log10(1024);
 
-        // Number of steps.
-        const steps = 1024;
-        const stepDuration = duration / steps;
-        let currentStep = 0;
+        let brightness = 0;
 
-        // Use setInterval to update the PWM value at regular intervals.
-        const intervalId = setInterval(() => {
-            if (currentStep > steps) {
-                clearInterval(intervalId);
-                return;
-            }
+        // Update the PWM value at regular intervals.
+        for (let interval = 0; interval <= pwmIntervals; interval++) {
+            // Calculate the required PWM value for this interval step
+            brightness = Math.pow(2, interval / R) - 1;
 
-            const t = currentStep / steps;
-            const interval = t * pwmIntervals;
-            const brightness = Math.pow(2, interval / R) - 1;
-            const pwmValue = Math.round(brightness);
-
-            GPIO.pwmSetData(this.PWM_DIMMER_PIN, pwmValue);
-            currentStep++;
-        }, stepDuration);
-
-        this.#fadeIntervals.push(intervalId);
+            // Set the PWM output to the calculated brightness.
+            GPIO.pwmSetData(this.PWM_DIMMER_PIN, Math.round(brightness));
+            // GPIO.msleep(1);
+        }
     }
 
     /**
@@ -163,11 +152,6 @@ export class StairService extends Singleton<StairService> {
      * @private
      */
     #cancelFade() {
-        // Clear any pending fade steps.
-        this.#fadeIntervals.forEach(intervalId => clearInterval(intervalId));
-        this.#fadeIntervals = [];
-
-        // Jump to 0v.
         GPIO.pwmSetData(this.PWM_DIMMER_PIN, 0);
     }
 }
